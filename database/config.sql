@@ -50,7 +50,7 @@ CREATE OR REPLACE VIEW scrypto.sc_newest_currency_data AS
 		GROUP BY cd1.type, cd1.name) AS cd3
 		ON (cd.created_date = cd3.max_created_date)
 	INNER JOIN scrypto.sc_currency AS c
-		ON c.name = cd.name
+		ON c.name = cd.name;
 
 
 -- functions
@@ -86,7 +86,7 @@ CREATE OR REPLACE FUNCTION scrypto.notify_new_currency_data() RETURNS trigger AS
                 'sequence', NEW.sequence,
                 'created_date', NEW.created_date
             )::text
-        )
+        );
 
         diff := NEW.created_date - interval'12 hours';
         SELECT min(cd.rate) INTO min_val FROM scrypto.sc_currency_data AS cd WHERE cd.created_date >= diff AND cd.name = NEW.name;
