@@ -1,0 +1,13 @@
+{
+  "name": "scrypto",
+  "description": "",
+  "keywords": [],
+  "website": "https://www.scrypto.pl",
+  "image": "heroku/node",
+  "repository": "https://github.com/Sarkel/scrypto",
+  "buildpacks": [
+    {
+      "url": "heroku/node"
+    }
+  ]
+}
