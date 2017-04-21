@@ -23,8 +23,8 @@ const queries = {
 function _compareCurrencies(remoteCurrencies) {
     const db = require('./database');
     db
-        .task(task => {
-            return task.manyOrNone(queries.getAll);
+        .task(transaction => {
+            return transaction.manyOrNone(queries.getAll);
         })
         .then(results => {
             let dbCurrencies = (results || []).map(value => {
@@ -32,7 +32,7 @@ function _compareCurrencies(remoteCurrencies) {
             });
             return db.tx(transaction => {
                 let records = [];
-                _.difference(remoteCurrencies, dbCurrencies)
+                _.difference(Object.keys(remoteCurrencies), dbCurrencies)
                     .forEach(value => {
                         records.push(
                             transaction.manyOrNone(queries.insert, {name: value})
