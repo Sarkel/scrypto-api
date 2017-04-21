@@ -16,8 +16,8 @@ const options = {
 };
 
 const queries = {
-    getAll: 'SELECT name FROM data_puller.dp_currency;',
-    insert: 'INSERT INTO data_puller.dp_currency(name) VALUES(${name});'
+    getAll: 'SELECT name FROM scrypto.sc_currency;',
+    insert: 'INSERT INTO scrypto.sc_currency(name) VALUES(${name});'
 };
 
 function _compareCurrencies(remoteCurrencies) {
