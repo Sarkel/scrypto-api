@@ -9,5 +9,11 @@
     {
       "url": "heroku/node"
     }
-  ]
+  ],
+  "env": {
+    "AUTHENTICATION_SECRET": {
+      "description": "A secret key for authentication",
+      "generator": "secret"
+    }
+  }
 }
