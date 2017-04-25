@@ -1,1 +1,7 @@
 # scrypto
+
+env variables:
+- DATABASE_URL
+- AUTHENTICATION_SECRET
+- TOKEN_EXPIRATION
+- REDIS_URL
