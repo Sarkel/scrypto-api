@@ -1,2 +1,2 @@
-web: node src/index.js
-worker: node src/pull_new_data.js
+web: node src/web
+worker: node src/workers/pull-new-data

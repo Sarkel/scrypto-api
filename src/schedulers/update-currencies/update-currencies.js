@@ -7,24 +7,19 @@
 
 'use strict';
 const request = require('request-promise'),
-    _ = require('lodash');
+    _ = require('lodash'),
+    options = {
+        method: 'GET',
+        uri: 'http://www.poloniex.com/public?command=returnTicker',
+        json: true
+    },
+    queries = require('../../lib/queries');
 
-const options = {
-    method: 'GET',
-    uri: 'http://www.poloniex.com/public?command=returnTicker',
-    json: true
-};
-
-const queries = {
-    getAll: 'SELECT name FROM scrypto.sc_currency;',
-    insert: 'INSERT INTO scrypto.sc_currency(name) VALUES(${name});'
-};
-
-function _compareCurrencies(remoteCurrencies) {
-    const db = require('./database');
+function compareCurrencies(remoteCurrencies) {
+    const db = require('../../lib/database');
     db
         .task(transaction => {
-            return transaction.manyOrNone(queries.getAll);
+            return transaction.manyOrNone(queries.GET_ALL_CURRENCY);
         })
         .then(results => {
             let dbCurrencies = (results || []).map(value => {
@@ -33,9 +28,9 @@ function _compareCurrencies(remoteCurrencies) {
             return db.tx(transaction => {
                 let records = [];
                 _.difference(Object.keys(remoteCurrencies), dbCurrencies)
-                    .forEach(value => {
+                    .forEach(name => {
                         records.push(
-                            transaction.manyOrNone(queries.insert, {name: value})
+                            transaction.manyOrNone(queries.INSERT_CURRENCY, {name})
                         );
                     });
                 return transaction.batch(records);
@@ -51,12 +46,14 @@ function _compareCurrencies(remoteCurrencies) {
         });
 }
 
-function checkCurrencies() {
-    request(options)
-        .then(_compareCurrencies)
-        .catch(err => {
-            console.error(err);
-        });
+function onError(err) {
+    console.error(err);
 }
 
-checkCurrencies();
+function updateCurrencies() {
+    request(options)
+        .then(compareCurrencies)
+        .catch(onError);
+}
+
+module.exports = updateCurrencies;
