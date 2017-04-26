@@ -13,8 +13,9 @@ const express = require('express'),
     responseFactory = require('../utilities/response-factory'),
     errors = require('../utilities/errors'),
     encryption = require('../utilities/encryption'),
-    email = require('../utilities/email'),
-    redisClient = require('../../lib/redis');
+    email = require('../utilities/verification'),
+    redisClient = require('../../lib/redis'),
+    authenticationToken = require('../utilities/authentication-token');
 
 router.post('/', (req, res, next) => {
     pgDb
@@ -23,23 +24,17 @@ router.post('/', (req, res, next) => {
         })
         .then(user => {
             if (user && encryption.comparePasswords(req.body.password, user.seed, user.password)) {
-                buildResponse(res, 200, {
-                    user_id: user.id,
-                    name: user.name,
-                    token: encryption.getToken()
-                });
                 responseFactory.buildSuccessResponse(res, 200, {
                     user_id: user.id,
                     name: user.name,
-                    token: AuthenticateUser.getToken()
+                    token: authenticationToken.getToken()
                 });
             } else {
                 responseFactory.propagateError(next, errors.INVALID_CREDENTIALS);
             }
         })
         .catch(err => {
-            console.error(err);
-            responseFactory.propagateError(next, errors.SERVER_ERROR);
+            responseFactory.propagateError(next, errors.SERVER_ERROR, err);
         });
 });
 
@@ -58,12 +53,11 @@ router.post('/register', (req, res, next) => {
             responseFactory.buildSuccessResponse(res, 201);
         })
         .catch(err => {
-            console.error(err);
-            responseFactory.propagateError(next, errors.SERVER_ERROR);
+            responseFactory.propagateError(next, errors.SERVER_ERROR, err);
         });
 });
 
-router.post('/forgotten-password', (req, res, next) => {
+router.post('/verification', (req, res, next) => {
     pgDb
         .task(connection => {
             return connection.oneOrNone(queries.GET_ACTIVE_USER_BY_EMAIL, {email: req.body.email});
@@ -75,26 +69,11 @@ router.post('/forgotten-password', (req, res, next) => {
             responseFactory.buildSuccessResponse(res, 200);
         })
         .catch(err => {
-            console.error(err);
-            responseFactory.propagateError(next, errors.SERVER_ERROR);
+            responseFactory.propagateError(next, errors.SERVER_ERROR, err);
         });
 
 });
 
-router.get('/confirm/:code', (req, res, next) => {
-    redisClient
-        .get(req.params.code)
-        .then(userId => {
-            return pgDb
-                .task(connection => {
-                    return connection.oneOrNone()
-                })
-        })
-        .catch(err => {
-            console.error(err);
-            responseFactory.propagateError(next, errors.SERVER_ERROR);
-        });
-});
 router.patch('/activate/:code', (req, res, next) => {
     const code = req.params.code;
     redisClient
@@ -110,8 +89,7 @@ router.patch('/activate/:code', (req, res, next) => {
             responseFactory.buildSuccessResponse(res, 201);
         })
         .catch(err => {
-            console.error(err);
-            responseFactory.propagateError(next, errors.SERVER_ERROR);
+            responseFactory.propagateError(next, errors.SERVER_ERROR, err);
         });
 });
 
@@ -130,8 +108,7 @@ router.patch('/password/:code', (req, res, next) => {
             responseFactory.buildSuccessResponse(res, 201);
         })
         .catch(err => {
-            console.error(err);
-            responseFactory.propagateError(next, errors.SERVER_ERROR);
+            responseFactory.propagateError(next, errors.SERVER_ERROR, err);
         });
 });
 

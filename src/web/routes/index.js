@@ -8,9 +8,12 @@
 'use strict';
 const express = require('express'),
     router = express.Router(),
-    authentication = require('./authentication'),
-    middlewares = require('../middlewares');
+    authenticated = require('./authenticated'),
+    middlewares = require('../middlewares'),
+    unauthenticated = require('./unauthenticated');
 
-router.use('/auth', authentication);
+router.use('/auth', authenticated);
 router.use(middlewares.authenticateToken);
+router.use('/', unauthenticated);
+
 module.exports = router;

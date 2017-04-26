@@ -7,20 +7,17 @@
 
 'use strict';
 const redisClient = require('../../lib/redis'),
-    gpc = require('generate-pincode');
-
-function sendEmail() {
-    return Promise.resolve(); // TODO send email via Salesforce
-}
+    gpc = require('generate-pincode'),
+    emails = require('../emails');
 
 function sendVerificationCode(user) {
     const code = gpc(4);
     redisClient.set(code, user.id);
-    return sendEmail();
+    return emails.sendVerificationCode(user.email, user.name, code);
 }
 
-const email = {
+const verification = {
     sendVerificationCode
 };
 
-module.exports = email;
+module.exports = verification;

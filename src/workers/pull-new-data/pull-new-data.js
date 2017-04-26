@@ -62,10 +62,12 @@ function onOpen(session) {
         .connect({direct: true})
         .then(connection => {
             connection.client.on('notification', notificationData => {
-                const payload = JSON.parse(notificationData.payload);
-                session.subscribe(payload.name, (data, sequence) => {
-                    addNewCurrencyData(data, sequence, payload.name);
-                });
+                if(notificationData.channel === 'new_currency') {
+                    const payload = JSON.parse(notificationData.payload);
+                    session.subscribe(payload.name, (data, sequence) => {
+                        addNewCurrencyData(data, sequence, payload.name);
+                    });
+                }
             });
             return connection.none(queries.CREATE_LISTENER, 'new_currency');
         })

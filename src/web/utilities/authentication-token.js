@@ -15,7 +15,7 @@ function verify(next, token, callback) {
 }
 
 function getToken() {
-    return Jwt.sign(
+    return jwt.sign(
         {
             value1: uuid.v4(),
             value2: uuid.v4(),

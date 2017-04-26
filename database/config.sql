@@ -10,7 +10,7 @@ CREATE TABLE scrypto.sc_user (
     "password" TEXT NOT NULL,
     "seed" TEXT NOT NULL,
     "name" VARCHAR(255) NOT NULL,
-    "active" BOOLEAN DEFAULT true,
+    "active" BOOLEAN DEFAULT false,
     "created_date" TIMESTAMP NOT NULL DEFAULT now(),
     CONSTRAINT sc_user_pk PRIMARY KEY ("id")
 );
@@ -81,6 +81,8 @@ CREATE OR REPLACE FUNCTION scrypto.notify_new_currency_data() RETURNS trigger AS
                 'id', NEW.id,
                 'rate', NEW.rate,
                 'name', NEW.name,
+                'first', split_part(NEW.name, '_', 1),
+                'second', split_part(NEW.name, '_', 2)
                 'type', NEW.type,
                 'amount', NEW.amount,
                 'sequence', NEW.sequence,
