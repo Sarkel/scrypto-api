@@ -15,7 +15,7 @@ const express = require('express'),
     port = process.env.PORT || 5000,
     app = express();
 
-require('express-ws')(app);
+const wsApp = require('express-ws')(app);
 
 app.set('port', port);
 

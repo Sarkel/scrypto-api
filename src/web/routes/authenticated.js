@@ -1,7 +1,7 @@
 /**
  * @Author Sebastian Kubalski
  * @Email sebastian.kubalski@gmail.com
- * @Date Creation 25/04/2017
+ * @Date Creation 27/04/2017
  * @Description
  */
 
@@ -11,77 +11,47 @@ const express = require('express'),
     pgDb = require('../../lib/database'),
     queries = require('../../lib/queries'),
     responseFactory = require('../utilities/response-factory'),
-    errors = require('../utilities/errors'),
-    encryption = require('../utilities/encryption'),
-    email = require('../utilities/verification'),
     redisClient = require('../../lib/redis'),
-    authenticationToken = require('../utilities/authentication-token');
+    errors = require('../utilities/errors');
 
-router.post('/', (req, res, next) => {
+router.get('/currencies', (req, res, next) => {
     pgDb
-        .task(connection => {
-            return connection.oneOrNone(queries.GET_ACTIVE_USER_BY_EMAIL, {email: req.body.email});
+        .task(transaction => {
+            return transaction.manyOrNone(queries.GET_ALL_FIRST_CURRENCY);
         })
-        .then(user => {
-            if (user && encryption.comparePasswords(req.body.password, user.seed, user.password)) {
-                responseFactory.buildSuccessResponse(res, 200, {
-                    user_id: user.id,
-                    name: user.name,
-                    token: authenticationToken.getToken()
-                });
-            } else {
-                responseFactory.propagateError(next, errors.INVALID_CREDENTIALS);
-            }
+        .then(currencies => {
+            responseFactory.buildSuccessResponse(res, 200, currencies);
         })
         .catch(err => {
             responseFactory.propagateError(next, errors.SERVER_ERROR, err);
         });
 });
 
-router.post('/register', (req, res, next) => {
+router.get('/latest-currency-data', (req, res, next) => {
     pgDb
-        .task(connection => {
-            return Promise.all([
-                connection.none(queries.CREATE_USER, Object.assign({}, req.body, encryption.encryptPassword(req.body.password))),
-                connection.one(queries.GET_USER_BY_EMAIL, {email: req.body.email})
-            ]);
+        .task(transaction => {
+            return transaction.manyOrNone(queries.LATEST_CURRENCY_DATA);
         })
-        .then(results => {
-            return email.sendVerificationCode(results[1]);
-        })
-        .then(() => {
-            responseFactory.buildSuccessResponse(res, 201);
+        .then(recentCurrencyData => {
+            responseFactory.buildSuccessResponse(res, 200, recentCurrencyData);
         })
         .catch(err => {
             responseFactory.propagateError(next, errors.SERVER_ERROR, err);
         });
 });
 
-router.post('/verification', (req, res, next) => {
-    pgDb
-        .task(connection => {
-            return connection.oneOrNone(queries.GET_ACTIVE_USER_BY_EMAIL, {email: req.body.email});
-        })
-        .then(user => {
-            return email.sendVerificationCode(user);
-        })
-        .then(() => {
-            responseFactory.buildSuccessResponse(res, 200);
-        })
-        .catch(err => {
-            responseFactory.propagateError(next, errors.SERVER_ERROR, err);
-        });
-
+router.patch('/users/:id', (req, res, next) => {
+    // TODO add user update logic
 });
 
-router.patch('/activate/:code', (req, res, next) => {
+router.delete('/users/:code', (req, res, next) => {
     const code = req.params.code;
     redisClient
         .get(code)
         .then(userId => {
             return pgDb
                 .task(connection => {
-                    return connection.none(queries.ACTIVATE_USER, {userId})
+                    return connection.none(queries.DEACTIVATE_USER, {userId});
                 });
         })
         .then(() => {
@@ -93,23 +63,24 @@ router.patch('/activate/:code', (req, res, next) => {
         });
 });
 
-router.patch('/password/:code', (req, res, next) => {
-    const code = req.params.code;
-    redisClient
-        .get(code)
-        .then(userId => {
-            return pgDb
-                .task(connection => {
-                    return connection.none(queries.CHANGE_PASSWORD, Object.assign({userId}, encryption.encryptPassword(req.body.password)))
-                });
-        })
-        .then(() => {
-            redisClient.del(code);
-            responseFactory.buildSuccessResponse(res, 201);
-        })
-        .catch(err => {
-            responseFactory.propagateError(next, errors.SERVER_ERROR, err);
-        });
-});
+// router.ws('/current-currency-data', ws => {
+//     pgDb
+//         .connect({direct: true})
+//         .then(connection => {
+//             connection.client.on('notification', notificationData => {
+//                 if(notificationData.channel === 'new_currency_data') {
+//                     ws.send(responseFactory.buildResponse(true, {payload: JSON.parse(notificationData.payload)}));
+//                 }
+//             });
+//             return connection.none(queries.CREATE_LISTENER, 'new_currency_data');
+//         })
+//         .then(() => {
+//             ws.send(responseFactory.buildResponse(true, {message: 'Connected'}))
+//         })
+//         .catch(err => {
+//             console.error(err);
+//             ws.send(responseFactory.buildResponse(false)); // TODO Add error message
+//         });
+// });
 
 module.exports = router;

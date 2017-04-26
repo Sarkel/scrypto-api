@@ -12,8 +12,8 @@ const express = require('express'),
     middlewares = require('../middlewares'),
     unauthenticated = require('./unauthenticated');
 
-router.use('/auth', authenticated);
+router.use('/auth', unauthenticated);
 router.use(middlewares.authenticateToken);
-router.use('/', unauthenticated);
+router.use('/', authenticated);
 
 module.exports = router;
