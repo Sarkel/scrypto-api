@@ -18,10 +18,10 @@ const utilities = {
         );
     },
     buildSuccessResponse: (res, status, payload = null) => {
-        res.status(status).json(this.buildResponse(true, {payload}));
+        res.status(status).json(utilities.buildResponse(true, {payload}));
     },
     buildErrorResponse: (res, err) => {
-        res.status(err.status || 500).json(this.buildResponse(false, {error_message: err.message}));
+        res.status(err.status || 500).json(utilities.buildResponse(false, {error_message: err.message}));
     },
     propagateError: (next, details, parentError = null) => {
         if (parentError) {
