@@ -9,16 +9,16 @@
 const express = require('express'),
     bodyParser = require('body-parser'),
     helmet = require('helmet'),
-    routes = require('./routes'),
     responseFactory = require('./utilities/response-factory'),
     errors = require('./utilities/errors'),
     port = process.env.PORT || 5000,
     app = express();
 
-const wsApp = require('express-ws')(app);
+require('express-ws')(app);
+
+const routes = require('./routes');
 
 app.set('port', port);
-
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(bodyParser.urlencoded({extended: false}));

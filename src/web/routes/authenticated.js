@@ -63,24 +63,24 @@ router.delete('/users/:code', (req, res, next) => {
         });
 });
 
-// router.ws('/current-currency-data', ws => {
-//     pgDb
-//         .connect({direct: true})
-//         .then(connection => {
-//             connection.client.on('notification', notificationData => {
-//                 if(notificationData.channel === 'new_currency_data') {
-//                     ws.send(responseFactory.buildResponse(true, {payload: JSON.parse(notificationData.payload)}));
-//                 }
-//             });
-//             return connection.none(queries.CREATE_LISTENER, 'new_currency_data');
-//         })
-//         .then(() => {
-//             ws.send(responseFactory.buildResponse(true, {message: 'Connected'}))
-//         })
-//         .catch(err => {
-//             console.error(err);
-//             ws.send(responseFactory.buildResponse(false)); // TODO Add error message
-//         });
-// });
+router.ws('/current-currency-data', ws => {
+    pgDb
+        .connect({direct: true})
+        .then(connection => {
+            connection.client.on('notification', notificationData => {
+                if(notificationData.channel === 'new_currency_data') {
+                    ws.send(responseFactory.buildResponse(true, {payload: JSON.parse(notificationData.payload)}));
+                }
+            });
+            return connection.none(queries.CREATE_LISTENER, 'new_currency_data');
+        })
+        .then(() => {
+            ws.send(responseFactory.buildResponse(true, {message: 'Connected'}))
+        })
+        .catch(err => {
+            console.error(err);
+            ws.send(responseFactory.buildResponse(false)); // TODO Add error message
+        });
+});
 
 module.exports = router;
