@@ -8,13 +8,13 @@
 'use strict';
 import { combineReducers } from 'redux';
 
-function test(state = { }, action) {
+function testReducer(state = { }, action) {
     switch (action.type) {
         default:
             return state
     }
 }
 
-const rootReducer = combineReducers({test});
+const rootReducer = combineReducers({testReducer});
 
 export default rootReducer;
