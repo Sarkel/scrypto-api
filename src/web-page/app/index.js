@@ -8,8 +8,15 @@
 'use strict';
 import React from "react";
 import ReactDOM from "react-dom";
+import AppRouter from "./src/AppRouter";
+import {Provider} from "react-redux";
+import configureStore from "./src/configureStore";
+
+const store = configureStore();
 
 ReactDOM.render(
-    <h1>Hello, world!</h1>,
+    <Provider store={store}>
+        <AppRouter/>
+    </Provider>,
     document.getElementById('root')
 );
