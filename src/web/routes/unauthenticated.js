@@ -17,7 +17,7 @@ const express = require('express'),
     redisClient = require('../../lib/redis'),
     authenticationToken = require('../utilities/authentication-token');
 
-router.post('/', (req, res, next) => {
+router.post('/login', (req, res, next) => {
     pgDb
         .task(connection => {
             return connection.oneOrNone(queries.GET_ACTIVE_USER_BY_EMAIL_OR_ID, {email: req.body.email});
