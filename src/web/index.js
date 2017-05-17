@@ -13,7 +13,8 @@ const express = require('express'),
     errors = require('./utilities/errors'),
     port = process.env.PORT || 5000,
     app = express(),
-    path = require('path');
+    path = require('path'),
+    cors = require('cors');
 
 require('express-ws')(app);
 
@@ -23,6 +24,9 @@ app.set('port', port);
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(bodyParser.urlencoded({extended: false}));
+
+app.use(cors());
+app.options('*', cors());
 
 app.use('/api/v1', routes);
 
