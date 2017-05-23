@@ -16,7 +16,7 @@ const express = require('express'),
     path = require('path'),
     cors = require('cors');
 
-require('express-ws')(app);
+// require('express-ws')(app);
 
 const routes = require('./routes');
 
