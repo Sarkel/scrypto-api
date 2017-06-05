@@ -7,31 +7,48 @@
 
 'use strict';
 const moment = require('moment');
+const {Logger} = require('./logger');
 
-const utilities = {
-    buildResponse: (success, data) => {
+class ResponseFactory {
+    _logger = Logger.getInstance();
+    static _instance = new ResponseFactory();
+
+    static _buildResponse(success, data) {
         return Object.assign({
                 success,
                 time: moment().format()
             },
             data
         );
-    },
-    buildSuccessResponse: (res, status, payload = null) => {
-        res.status(status).json(utilities.buildResponse(true, {payload}));
-    },
-    buildErrorResponse: (res, err) => {
-        res.status(err.status || 500).json(utilities.buildResponse(false, {error_message: err.message}));
-    },
-    propagateError: (next, details, parentError = null) => {
-        if (parentError) {
-            console.error(parentError);
-        }
-        const err = new Error();
-        err.status = details.status;
-        err.message = details.message;
+    }
+
+    static getInstance() {
+        return ResponseFactory._instance;
+    }
+
+    buildSuccessResponse(res, status, payload = null) {
+        this._logger.info('Success request');
+        res.status(status).json(ResponseFactory._buildResponse(true, {payload}));
+    }
+
+    buildErrorResponse(res, err) {
+        this._logger.error(err);
+        res
+            .status(err.getStatus() || 500)
+            .json(
+                ResponseFactory.buildResponse(
+                    false,
+                    {
+                        error_message: err.getMessage()
+                    }
+                )
+            );
+    }
+
+    propagateError(next, err) {
+        this._logger.error('Error request');
         next(err);
     }
-};
+}
 
-module.exports = utilities;
+module.exports = {ResponseFactory};

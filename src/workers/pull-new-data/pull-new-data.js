@@ -12,7 +12,7 @@ const autobahn = require('autobahn'),
     queries = require('../../lib/queries'),
     fields = ['rate', 'type', 'amount'].sort();
 
-
+// todo: refactoring to ES6 class based architecture
 function addNewCurrencyData(data, sequence, name) {
     db
         .tx(transaction => {

@@ -6,33 +6,50 @@
  */
 
 'use strict';
-const jwt = require('jsonwebtoken'),
-    uuid = require('uuid'),
-    algorithm = 'HS512';
+const jwt = require('jsonwebtoken');
+const uuid = require('uuid');
+const {InvalidAuthorizationToken} = require('./error-factory');
 
-function verify(next, token, callback) {
-    jwt.verify(token, process.env.AUTHENTICATION_SECRET, {algorithms: [algorithm]}, callback.bind(null, next));
+const algorithm = 'HS512';
+
+
+class AuthenticationToken {
+    static _ALGORITHM = 'HS512';
+
+    static getToken() {
+        return jwt.sign(
+            {
+                value1: uuid.v4(),
+                value2: uuid.v4(),
+                value3: uuid.v4(),
+                value4: uuid.v4()
+            },
+            process.env.AUTHENTICATION_SECRET,
+            {
+                expiresIn: process.env.TOKEN_EXPIRATION,
+                algorithm
+            }
+        );
+    }
+
+    static verify(token) {
+        return new Promise((resolve, reject) => {
+            jwt.verify(
+                token,
+                process.env.AUTHENTICATION_SECRET,
+                {
+                    algorithms: [AuthenticationToken._ALGORITHM]
+                },
+                err => {
+                    if (err) {
+                        reject(new InvalidAuthorizationToken(err));
+                    } else {
+                        resolve();
+                    }
+                }
+            );
+        });
+    }
 }
 
-function getToken() {
-    return jwt.sign(
-        {
-            value1: uuid.v4(),
-            value2: uuid.v4(),
-            value3: uuid.v4(),
-            value4: uuid.v4()
-        },
-        process.env.AUTHENTICATION_SECRET,
-        {
-            expiresIn: process.env.TOKEN_EXPIRATION,
-            algorithm
-        }
-    );
-}
-
-const authenticationToken = {
-    verify,
-    getToken
-};
-
-module.exports = authenticationToken;
+module.exports = {AuthenticationToken};

@@ -7,26 +7,24 @@
 
 'use strict';
 const bcrypt = require('bcrypt-nodejs');
+const randomString = require('random-string');
 
-function createHashMessage(password, seed) {
-    return seed + password + seed;
+class Encryption {
+    static encryptPassword(password) {
+        const seed = randomString();
+        return {
+            password: bcrypt.hashSync(Encryption._createHashMessage(password, seed)),
+            seed: seed
+        };
+    }
+
+    static _createHashMessage(password, seed) {
+        return seed + password + seed;
+    }
+
+    static comparePasswords(password, seed, hashPassword) {
+        return bcrypt.compareSync(Encryption._createHashMessage(password, seed), hashPassword);
+    }
 }
 
-function encryptPassword(password) {
-    const seed = Math.random().toString(36).substring(5, 20);
-    return {
-        password: bcrypt.hashSync(createHashMessage(password, seed)),
-        seed: seed
-    };
-}
-
-function comparePasswords(password, seed, hashPassword) {
-    return bcrypt.compareSync(createHashMessage(password, seed), hashPassword);
-}
-
-const encryption = {
-    encryptPassword,
-    comparePasswords
-};
-
-module.exports = encryption;
+module.exports = {Encryption};
