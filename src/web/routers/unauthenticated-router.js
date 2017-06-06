@@ -14,16 +14,9 @@ const {ActivateRouter} = require('./activate-router');
 const {PasswordRouter} = require('./password-router');
 const {AuthenticationToken} = require('../utilities/authentication-token');
 
-const GET_ACTIVE_USER_BY_EMAIL_OR_ID =
-    `SELECT u.id, u.email, u.password, u.name, u.seed 
-            FROM scrypto.sc_user AS u 
-            WHERE (u.email = $[email] OR u.id = $[userId]) AND u.active = true;`;
+const GET_ACTIVE_USER_BY_EMAIL_OR_ID = 'SELECT * FROM scrypto.sc_get_active_user($[email], $[userId]);';
 
-const CREATE_USER =
-    `INSERT INTO scrypto.sc_user(email, password, seed, name) 
-            VALUES($[email], $[password], $[seed], $[name]);`;
-
-const GET_USER_BY_EMAIL = `SELECT u.id, u.name, u.email FROM scrypto.sc_user AS u WHERE u.email = $[email];`;
+const CREATE_USER = 'SELECT * FROM scrypto.sc_create_user($[email], $[password], $[seed], $[name])';
 
 class UnauthenticatedRouter extends BaseRouter {
     constructor() {
@@ -69,16 +62,13 @@ class UnauthenticatedRouter extends BaseRouter {
 
     async _register(req, res, next) {
         try {
-            const [, user] = await thi._pgDb.task(conn => {
-                return Promise.all([
-                    conn.none(CREATE_USER, Object.assign({
-                            email: req.body.email,
-                            name: req.body.name
-                        },
-                        Encryption.encryptPassword(req.body.password))
-                    ),
-                    conn.one(GET_USER_BY_EMAIL, {email: req.body.email})
-                ]);
+            const user = await this._pgDb.task(conn => {
+                return conn.one(CREATE_USER, Object.assign({
+                        email: req.body.email,
+                        name: req.body.name
+                    },
+                    Encryption.encryptPassword(req.body.password))
+                );
             });
             await Email.sendVerificationCode(user.id, user.email, user.name);
             this._responseFactory.buildSuccessResponse(res, 201);

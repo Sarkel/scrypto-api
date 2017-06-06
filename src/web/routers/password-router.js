@@ -10,8 +10,7 @@ const {BaseRouter} = require('./base-router');
 const {ServerError} = require('../utilities/error-factory');
 const {Encryption} = require('../utilities/encryption');
 
-const CHANGE_PASSWORD =
-    'UPDATE scrypto.sc_user SET password = $[password], seed = $[seed] WHERE id = $[userId] AND active = true;';
+const CHANGE_PASSWORD = 'SELECT scrypto.sc_change_password($[password], $[seed], $[userId]);';
 
 class PasswordRouter extends BaseRouter {
     constructor() {

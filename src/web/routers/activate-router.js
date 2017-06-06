@@ -9,7 +9,7 @@
 const {BaseRouter} = require('./base-router');
 const {ServerError} = require('../utilities/error-factory');
 
-const ACTIVATE_USER = 'UPDATE scrypto.sc_user SET active = true WHERE id = ${userId};';
+const ACTIVATE_USER = 'SELECT scrypto.sc_activate_user($[userId]);';
 
 class ActivateRouter extends BaseRouter {
     constructor() {
