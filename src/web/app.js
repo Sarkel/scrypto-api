@@ -14,14 +14,14 @@ const {Logger} = require('./utilities/logger');
 const {AppRouter} = require('./routers/app-router');
 const {ResponseFactory} = require('./utilities/response-factory');
 
+const PORT = process.env.PORT || 5000;
+
 class App {
-    static _PORT = process.env.PORT || 5000;
-
-    _app = express();
-    _logger = Logger.getInstance();
-    _responseFactory = ResponseFactory.getInstance();
-
     constructor() {
+        this._app = express();
+        this._logger = Logger.getInstance();
+        this._responseFactory = ResponseFactory.getInstance();
+
         this._setPort();
         this._setBodyParser();
         this._setMiddlewares();
@@ -49,7 +49,7 @@ class App {
     }
 
     _setPort() {
-        this._app.set('port', App._PORT);
+        this._app.set('port', PORT);
     }
 
     _createRoutes() {
@@ -64,8 +64,8 @@ class App {
     }
 
     listen() {
-        this._app.listen(App._PORT, () => {
-            this._logger.info(`'Node app is running on port: ${App._PORT}'`);
+        this._app.listen(PORT, () => {
+            this._logger.info(`'Node app is running on port: ${PORT}'`);
         });
     }
 }

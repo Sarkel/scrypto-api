@@ -9,7 +9,10 @@
 const {BaseRouter} = require('./base-router');
 
 class SearchRouter extends BaseRouter {
-    static _URI = '/search';
+    constructor() {
+        super();
+        this._setRoutes();
+    }
 
     _setRoutes() {
         this._createGetRoute('/', this._doSearch);
@@ -21,7 +24,7 @@ class SearchRouter extends BaseRouter {
     }
 
     getUri() {
-        return SearchRouter._URI;
+        return '/search';
     }
 }
 

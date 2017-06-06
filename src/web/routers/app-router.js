@@ -12,10 +12,12 @@ const {UnauthenticatedRouter} = require('./unauthenticated-router');
 const {AuthenticationService} = require('../middlewares/authentication-service');
 
 class AppRouter extends BaseRouter {
-    static _URI = '/api/v1';
-
-    _authenticatedRouter = new AuthenticatedRouter();
-    _unauthenticatedRouter = new UnauthenticatedRouter();
+    constructor() {
+        super();
+        this._authenticatedRouter = new AuthenticatedRouter();
+        this._unauthenticatedRouter = new UnauthenticatedRouter();
+        this._setRoutes();
+    }
 
     _setRoutes() {
         this._createRoute(this._unauthenticatedRouter.getUri(), this._unauthenticatedRouter.getRouter());
@@ -24,7 +26,7 @@ class AppRouter extends BaseRouter {
     }
 
     getUri() {
-        return AppRouter._URI;
+        return '/api/v1';
     }
 }
 

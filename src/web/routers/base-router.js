@@ -13,14 +13,12 @@ const {ResponseFactory} = require('../utilities/response-factory');
 const redisClient = require('../../lib/redis');
 
 class BaseRouter {
-    _router = Router();
-    _logger = Logger.getInstance();
-    _pgDb = pgDb;
-    _responseFactory = ResponseFactory.getInstance();
-    _redis = redisClient;
-
     constructor() {
-        this._setRoutes();
+        this._router = Router();
+        this._logger = Logger.getInstance();
+        this._pgDb = pgDb;
+        this._responseFactory = ResponseFactory.getInstance();
+        this._redis = redisClient;
     }
 
     _createGetRoute(name, func) {
@@ -40,7 +38,7 @@ class BaseRouter {
     }
 
     _createRoute(name, router) {
-        this.use(name, router);
+        this._router.use(name, router);
     }
 
     _setMiddleware(middleware) {

@@ -10,8 +10,9 @@ const moment = require('moment');
 const {Logger} = require('./logger');
 
 class ResponseFactory {
-    _logger = Logger.getInstance();
-    static _instance = new ResponseFactory();
+    constructor() {
+        this._logger = Logger.getInstance();
+    }
 
     static _buildResponse(success, data) {
         return Object.assign({
@@ -23,6 +24,9 @@ class ResponseFactory {
     }
 
     static getInstance() {
+        if(!ResponseFactory._instance) {
+            ResponseFactory._instance = new ResponseFactory();
+        }
         return ResponseFactory._instance;
     }
 
@@ -36,7 +40,7 @@ class ResponseFactory {
         res
             .status(err.getStatus() || 500)
             .json(
-                ResponseFactory.buildResponse(
+                ResponseFactory._buildResponse(
                     false,
                     {
                         error_message: err.getMessage()

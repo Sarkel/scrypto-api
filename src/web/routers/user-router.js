@@ -9,10 +9,13 @@
 const {BaseRouter} = require('./base-router');
 const {ServerError} = require('../utilities/error-factory');
 
-class UserRouter extends BaseRouter {
-    static _URI = '/user';
+const DEACTIVATE_USER = 'UPDATE scrypto.sc_user SET active = false WHERE id = ${userId};';
 
-    static _DEACTIVATE_USER = 'UPDATE scrypto.sc_user SET active = false WHERE id = ${userId};';
+class UserRouter extends BaseRouter {
+    constructor() {
+        super();
+        this._setRoutes();
+    }
 
     _setRoutes() {
         this._createDeleteRoute('/:code', this._deactivateUser);
@@ -20,7 +23,7 @@ class UserRouter extends BaseRouter {
     }
 
     getUri() {
-        return User._URI;
+        return '/user';
     }
 
     async _update(req, res, next) {
@@ -33,7 +36,7 @@ class UserRouter extends BaseRouter {
             const code = req.params.code;
             const userId = await this._redis.get(code);
             await pgDb.task(conn => {
-                return conn.none(User._DEACTIVATE_USER, {userId});
+                return conn.none(DEACTIVATE_USER, {userId});
             });
             this._redis.del(code);
             this._responseFactory.buildSuccessResponse(res, 201);

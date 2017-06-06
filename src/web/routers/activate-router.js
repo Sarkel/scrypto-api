@@ -9,17 +9,20 @@
 const {BaseRouter} = require('./base-router');
 const {ServerError} = require('../utilities/error-factory');
 
-class ActivateRouter extends BaseRouter {
-    static _URI = '/activate';
+const ACTIVATE_USER = 'UPDATE scrypto.sc_user SET active = true WHERE id = ${userId};';
 
-    static _ACTIVATE_USER = 'UPDATE scrypto.sc_user SET active = true WHERE id = ${userId};';
+class ActivateRouter extends BaseRouter {
+    constructor() {
+        super();
+        this._setRoutes();
+    }
 
     _setRoutes() {
         this._createPatchRoute('/:code', this._doActivate);
     }
 
     getUri() {
-        return ActivateRouter._URI;
+        return '/activate';
     }
 
     async _doActivate(req, res, next) {
@@ -27,7 +30,7 @@ class ActivateRouter extends BaseRouter {
             const code = req.params.code;
             const userId = await this._redis.get(code);
             await this._pgDb.task(conn => {
-                return conn.none(ActivateRouter._ACTIVATE_USER, {userId})
+                return conn.none(ACTIVATE_USER, {userId})
             });
             this._redis.del(code);
             this._responseFactory.buildSuccessResponse(res, 201);

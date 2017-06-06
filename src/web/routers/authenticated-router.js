@@ -12,11 +12,13 @@ const {SearchRouter} = require('./search-router');
 const {UserRouter} = require('./user-router');
 
 class AuthenticatedRouter extends BaseRouter {
-    static _URI = '/';
-
-    _currencyRouter = new CurrencyRouter();
-    _searchRouter = new SearchRouter();
-    _userRouter = new UserRouter();
+    constructor() {
+        super();
+        this._currencyRouter = new CurrencyRouter();
+        this._searchRouter = new SearchRouter();
+        this._userRouter = new UserRouter();
+        this._setRoutes();
+    }
 
     _setRoutes() {
         this._createRoute(this._currencyRouter.getUri(), this._currencyRouter.getRouter());
@@ -25,7 +27,7 @@ class AuthenticatedRouter extends BaseRouter {
     }
 
     getUri() {
-        return AuthenticatedRouter._URI;
+        return '/';
     }
 }
 

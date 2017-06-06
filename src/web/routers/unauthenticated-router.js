@@ -14,22 +14,24 @@ const {ActivateRouter} = require('./activate-router');
 const {PasswordRouter} = require('./password-router');
 const {AuthenticationToken} = require('../utilities/authentication-token');
 
-class UnauthenticatedRouter extends BaseRouter {
-    static _URI = '/auth';
-
-    _activateRouter = new ActivateRouter();
-    _passwordRouter = new PasswordRouter();
-
-    static _GET_ACTIVE_USER_BY_EMAIL_OR_ID =
-        `SELECT u.id, u.email, u.password, u.name, u.seed 
+const GET_ACTIVE_USER_BY_EMAIL_OR_ID =
+    `SELECT u.id, u.email, u.password, u.name, u.seed 
             FROM scrypto.sc_user AS u 
             WHERE (u.email = $[email] OR u.id = $[userId]) AND u.active = true;`;
 
-    static _CREATE_USER =
-        `INSERT INTO scrypto.sc_user(email, password, seed, name) 
+const CREATE_USER =
+    `INSERT INTO scrypto.sc_user(email, password, seed, name) 
             VALUES($[email], $[password], $[seed], $[name]);`;
 
-    static _GET_USER_BY_EMAIL = `SELECT u.id, u.name, u.email FROM scrypto.sc_user AS u WHERE u.email = $[email];`;
+const GET_USER_BY_EMAIL = `SELECT u.id, u.name, u.email FROM scrypto.sc_user AS u WHERE u.email = $[email];`;
+
+class UnauthenticatedRouter extends BaseRouter {
+    constructor() {
+        super();
+        this._activateRouter = new ActivateRouter();
+        this._passwordRouter = new PasswordRouter();
+        this._setRoutes();
+    }
 
     _setRoutes() {
         this._createPostRoute('/login', this._login);
@@ -40,13 +42,13 @@ class UnauthenticatedRouter extends BaseRouter {
     }
 
     getUri() {
-        return UnauthenticatedRouter._URI;
+        return '/auth';
     }
 
     async _login(req, res, next) {
         try {
             const user = await this._pgDb.task(conn => {
-                return conn.oneOrNone(UnauthenticatedRouter._GET_ACTIVE_USER_BY_EMAIL_OR_ID, {
+                return conn.oneOrNone(GET_ACTIVE_USER_BY_EMAIL_OR_ID, {
                     email: req.body.email,
                     userId: null
                 });
@@ -69,13 +71,13 @@ class UnauthenticatedRouter extends BaseRouter {
         try {
             const [, user] = await thi._pgDb.task(conn => {
                 return Promise.all([
-                    conn.none(UnauthenticatedRouter._CREATE_USER, Object.assign({
+                    conn.none(CREATE_USER, Object.assign({
                             email: req.body.email,
                             name: req.body.name
                         },
                         Encryption.encryptPassword(req.body.password))
                     ),
-                    conn.one(UnauthenticatedRouter._GET_USER_BY_EMAIL, {email: req.body.email})
+                    conn.one(GET_USER_BY_EMAIL, {email: req.body.email})
                 ]);
             });
             await Email.sendVerificationCode(user.id, user.email, user.name);
@@ -88,7 +90,7 @@ class UnauthenticatedRouter extends BaseRouter {
     async _verification(req, res, next) {
         try {
             const user = await this._pgDb.task(conn => {
-                return conn.oneOrNone(UnauthenticatedRouter._GET_ACTIVE_USER_BY_EMAIL_OR_ID, {
+                return conn.oneOrNone(GET_ACTIVE_USER_BY_EMAIL_OR_ID, {
                     email: req.body.email,
                     userId: req.body.id
                 });

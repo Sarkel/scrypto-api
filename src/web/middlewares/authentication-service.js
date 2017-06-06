@@ -15,7 +15,10 @@ const {AuthenticationToken} = require('../utilities/authentication-token');
 const {ResponseFactory} = require('../utilities/response-factory');
 
 class AuthenticationService {
-    _responseFactory = ResponseFactory.getInstance();
+    constructor() {
+        this._responseFactory = ResponseFactory.getInstance();
+        this.authenticateToken = this.authenticateToken.bind(this);
+    }
 
     static _extractTokenFromHeader(header) {
         if (header) {
@@ -34,7 +37,7 @@ class AuthenticationService {
         try {
             const token = req.body.token ||
                 req.query.token ||
-                Authentication._extractTokenFromHeader(req.headers['authorization']);
+                AuthenticationService._extractTokenFromHeader(req.headers['authorization']);
             if (token) {
                 await AuthenticationToken.verify(token);
                 next();

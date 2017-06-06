@@ -9,12 +9,15 @@
 const {BaseRouter} = require('./base-router');
 const {ServerError} = require('../utilities/error-factory');
 
-class CurrencyRouter extends BaseRouter {
-    static _GET_ALL_FIRST_CURRENCY = 'SELECT c.first AS name FROM scrypto.sc_currency AS c GROUP BY c.first;';
-    static _LATEST_CURRENCY_DATA =
-        'SELECT * FROM data_puller.dp_newest_currency_data WHERE lower(first) = lower(${name});';
+const GET_ALL_FIRST_CURRENCY = 'SELECT c.first AS name FROM scrypto.sc_currency AS c GROUP BY c.first;';
+const LATEST_CURRENCY_DATA =
+    'SELECT * FROM data_puller.dp_newest_currency_data WHERE lower(first) = lower(${name});';
 
-    static _URI = '/currency';
+class CurrencyRouter extends BaseRouter {
+    constructor() {
+        super();
+        this._setRoutes();
+    }
 
     _setRoutes() {
         this._createGetRoute('/', this._getTabs);
@@ -22,13 +25,13 @@ class CurrencyRouter extends BaseRouter {
     }
 
     getUri() {
-        return Currency._URI;
+        return '/currency';
     }
 
     async _getTabs(req, res, next) {
         try {
             const currencies = await this._pgDb.task(conn => {
-                return conn.manyOrNone(Currency._GET_ALL_FIRST_CURRENCY);
+                return conn.manyOrNone(GET_ALL_FIRST_CURRENCY);
             });
             this._responseFactory.buildSuccessResponse(res, 200, currencies);
         } catch (err) {
@@ -39,7 +42,7 @@ class CurrencyRouter extends BaseRouter {
     async _getLatest(req, res, next) {
         try {
             const recentCurrencyData = await this._pgDb.task(conn => {
-                return conn.manyOrNone(Currency._LATEST_CURRENCY_DATA);
+                return conn.manyOrNone(LATEST_CURRENCY_DATA);
             });
             this._responseFactory.buildSuccessResponse(res, 200, recentCurrencyData);
         } catch (err) {

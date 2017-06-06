@@ -10,12 +10,9 @@ const jwt = require('jsonwebtoken');
 const uuid = require('uuid');
 const {InvalidAuthorizationToken} = require('./error-factory');
 
-const algorithm = 'HS512';
-
+const ALGORITHMS = ['HS512'];
 
 class AuthenticationToken {
-    static _ALGORITHM = 'HS512';
-
     static getToken() {
         return jwt.sign(
             {
@@ -38,7 +35,7 @@ class AuthenticationToken {
                 token,
                 process.env.AUTHENTICATION_SECRET,
                 {
-                    algorithms: [AuthenticationToken._ALGORITHM]
+                    algorithms: ALGORITHMS
                 },
                 err => {
                     if (err) {

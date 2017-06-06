@@ -17,33 +17,51 @@ class BaseError extends Error {
 }
 
 class NotFoundError extends BaseError {
-    _message = 'Not Found';
-    _status = 404;
+    constructor() {
+        super();
+        this._message = 'Not Found';
+        this._status = 404;
+    }
 }
 
 class MissingAuthenticationMethodError extends BaseError {
-    _message = 'Authorization method is missing';
-    _status = 401;
+    constructor() {
+        super();
+        this._message = 'Authorization method is missing';
+        this._status = 401;
+    }
 }
 
 class MissingAuthorizationTokenError extends BaseError {
-    _message = 'Token is missing';
-    _status = 401;
+    constructor() {
+        super();
+        this._message = 'Token is missing';
+        this._status = 401;
+    }
 }
 
 class InvalidAuthorizationToken extends BaseError {
-    _message = 'Invalid token';
-    _status = 401;
+    constructor() {
+        super();
+        this._message = 'Invalid token';
+        this._status = 401;
+    }
 }
 
 class InvalidCredentialsError extends BaseError {
-    _message = 'Invalid email or password';
-    _status = 401;
+    constructor() {
+        super();
+        this._message = 'Invalid email or password';
+        this._status = 401;
+    }
 }
 
 class ServerError extends BaseError {
-    _message = 'Server error';
-    _status = 500;
+    constructor() {
+        super();
+        this._message = 'Server error';
+        this._status = 500;
+    }
 }
 
 module.exports = {

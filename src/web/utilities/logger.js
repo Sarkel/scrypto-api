@@ -7,9 +7,10 @@
 
 'use strict';
 class Logger {
-    static _instance = new Logger();
-
     static getInstance() {
+        if(!Logger._instance) {
+            Logger._instance = new Logger();
+        }
         return Logger._instance;
     }
 
