@@ -6,6 +6,6 @@
  */
 
 'use strict';
-const pullNewData = require('./pull-new-data');
+const {NewDataPuller} = require('./new-data-puller');
 
-pullNewData();
+new NewDataPuller().open();

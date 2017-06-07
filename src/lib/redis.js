@@ -10,4 +10,4 @@ const redis = require('then-redis');
 
 const redisClient = redis.createClient(process.env.REDIS_URL);
 
-module.exports = redisClient;
+module.exports = {redisClient};
