@@ -10,7 +10,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const cors = require('cors');
-const {Logger} = require('./utilities/logger');
+const {Logger} = require('../lib/logger');
 const {AppRouter} = require('./routers/app-router');
 const {ResponseFactory} = require('./utilities/response-factory');
 

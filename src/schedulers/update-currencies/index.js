@@ -6,6 +6,6 @@
  */
 
 'use strict';
-const updateCurrencies = require('./update-currencies');
+const {UpdateCurrencies} = require('./update-currencies');
 
-updateCurrencies();
+new UpdateCurrencies().run();

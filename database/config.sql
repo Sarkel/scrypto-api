@@ -159,12 +159,36 @@ CREATE OR REPLACE FUNCTION scrypto.notify_new_currency() RETURNS trigger AS $$
     END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION scrypto.notify_new_currency_data() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION scrypto.notify_exceeded_currency_rate() RETURNS trigger AS $$
     DECLARE
         diff TIMESTAMP;
         min_val NUMERIC;
-        rate NUMERIC;
-        newRate NUMERIC;
+        exceeded_currency_rate_array JSON;
+    BEGIN
+        diff := NEW.created_date - interval'12 hours';
+
+        SELECT min(cd.rate) INTO min_val
+            FROM scrypto.sc_currency_data AS cd
+            WHERE cd.created_date >= diff AND cd.name = NEW.name;
+
+        SELECT array_to_json(array_agg(t)) INTO exceeded_currency_rate_array
+            FROM (
+                SELECT ucr.currency AS name, NEW.rate AS rate, ucr.rate AS currency_rate, ucr.user AS user_id
+                    FROM scrypto.sc_user_currency_rate AS ucr
+                    WHERE ucr.currency = NEW.name AND NEW.rate / min_val > ucr.rate
+            ) AS t;
+
+        IF (json_array_length(exceeded_currency_rate_array) > 0) THEN
+            PERFORM pg_notify('exceeded_currency_rate', exceeded_currency_rate_array::text);
+            UPDATE scrypto.sc_user_currency_rate
+                SET rate = rate + (rate * 0.5)
+                WHERE ucr.currency = NEW.name AND NEW.rate / min_val > rate;
+        END IF;
+        RETURN NEW;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION scrypto.notify_new_currency_data() RETURNS trigger AS $$
     BEGIN
         PERFORM pg_notify('new_currency_data',
             json_build_object(
@@ -179,26 +203,29 @@ CREATE OR REPLACE FUNCTION scrypto.notify_new_currency_data() RETURNS trigger AS
                 'created_date', NEW.created_date
             )::text
         );
-
-        diff := NEW.created_date - interval'12 hours';
-        SELECT min(cd.rate) INTO min_val FROM scrypto.sc_currency_data AS cd WHERE cd.created_date >= diff AND cd.name = NEW.name;
-        SELECT cu.rate INTO rate FROM scrypto.sc_currency AS cu WHERE cu.name = NEW.name;
-        IF (NEW.rate / min_val > rate) THEN
-            PERFORM pg_notify('send_message',
-                json_build_object(
-                    'name', NEW.name,
-                    'rate', NEW.rate,
-                    'currency_rate', rate
-                )::text
-            );
-            newRate := rate + (rate * 0.5);
-            UPDATE scrypto.sc_currency SET rate = newRate WHERE name = NEW.name;
-        END IF;
         RETURN NEW;
     END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION scrypto.create_currency(name varchar(20)) RETURNS void AS $$
+    INSERT INTO scrypto.sc_currency(name) VALUES(name);
+$$ LANGUAGE sql;
 
+CREATE OR REPLACE FUNCTION scrypto.create_currecy_data(
+    rate numeric, type varchar, amount numeric, sequence varchar, name varchar(20))
+    RETURNS void AS $$
+        INSERT INTO scrypto.sc_currency_data(rate, type, amount, sequence, name)
+            VALUES(rate, type, amount, sequence, name);
+$$ LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION scrypto.clear_old_currency_data() RETURNS void AS $$
+    DECLARE
+        diff TIMESTAMP;
+    BEGIN
+        diff := current_timestamp - interval'24 hours';
+        DELETE FROM scrypto.sc_currency_data WHERE created_date <= diff;
+    END;
+$$ LANGUAGE plpgsql;
 
 -- triggers
 CREATE TRIGGER sc_currency_split_name
@@ -211,10 +238,15 @@ CREATE TRIGGER sc_currency_notify_new_currency
     FOR EACH ROW
     EXECUTE PROCEDURE scrypto.notify_new_currency();
 
-CREATE TRIGGER sc_currency_data_notify_send_sms
+CREATE TRIGGER sc_currency_data_notify_new_currency_data
     AFTER INSERT ON scrypto.sc_currency_data
     FOR EACH ROW
     EXECUTE PROCEDURE scrypto.notify_new_currency_data();
+
+CREATE TRIGGER sc_currency_data_notify_exceeded_currency_rate
+    AFTER INSERT ON scrypto.sc_currency_data
+    FOR EACH ROW
+    EXECUTE PROCEDURE scrypto.notify_exceeded_currency_rate();
 
 CREATE TRIGGER sc_user_process_currency_rate
     AFTER INSERT OR UPDATE ON scrypto.sc_user

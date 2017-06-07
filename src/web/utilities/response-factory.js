@@ -7,7 +7,7 @@
 
 'use strict';
 const moment = require('moment');
-const {Logger} = require('./logger');
+const {Logger} = require('../../lib/logger');
 
 class ResponseFactory {
     constructor() {
