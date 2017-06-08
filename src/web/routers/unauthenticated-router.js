@@ -43,14 +43,13 @@ class UnauthenticatedRouter extends BaseRouter {
 
     async _login(req, res, next) {
         try {
-            const {email, password} = req.body;
             const user = await this._pgDb.task(conn => {
                 return conn.oneOrNone(GET_ACTIVE_USER_BY_EMAIL_OR_ID, {
-                    email: email,
+                    email: req.body.email,
                     userId: null
                 });
             });
-            if (user && Encryption.comparePasswords(password, user.seed, user.password)) {
+            if (user && Encryption.comparePasswords(req.body.password, user.seed, user.password)) {
                 this._responseFactory.buildSuccessResponse(res, 200, {
                     user_id: user.id,
                     name: user.name,
