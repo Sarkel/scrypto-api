@@ -182,7 +182,7 @@ CREATE OR REPLACE FUNCTION scrypto.notify_exceeded_currency_rate() RETURNS trigg
             PERFORM pg_notify('exceeded_currency_rate', exceeded_currency_rate_array::text);
             UPDATE scrypto.sc_user_currency_rate
                 SET rate = rate + (rate * 0.5)
-                WHERE ucr.currency = NEW.name AND NEW.rate / min_val > rate;
+                WHERE currency = NEW.name AND NEW.rate / min_val > rate;
         END IF;
         RETURN NEW;
     END;

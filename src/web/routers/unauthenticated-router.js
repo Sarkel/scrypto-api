@@ -43,14 +43,13 @@ class UnauthenticatedRouter extends BaseRouter {
 
     async _login(req, res, next) {
         try {
-            const {email, password} = req.body;
             const user = await this._pgDb.task(conn => {
                 return conn.oneOrNone(GET_ACTIVE_USER_BY_EMAIL_OR_ID, {
-                    email: email,
+                    email: req.body.email,
                     userId: null
                 });
             });
-            if (user && Encryption.comparePasswords(password, user.seed, user.password)) {
+            if (user && Encryption.comparePasswords(req.body.password, user.seed, user.password)) {
                 this._responseFactory.buildSuccessResponse(res, 200, {
                     user_id: user.id,
                     name: user.name,
@@ -66,6 +65,8 @@ class UnauthenticatedRouter extends BaseRouter {
 
     async _register(req, res, next) {
         try {
+            this._logger.info('Entered registration');
+            this._logger.info(req.body);
             const user = await this._pgDb.task(conn => {
                 return conn.one(CREATE_USER, Object.assign({
                         email: req.body.email,
@@ -74,7 +75,9 @@ class UnauthenticatedRouter extends BaseRouter {
                     Encryption.encryptPassword(req.body.password))
                 );
             });
+            this._logger.info('User created');
             await Email.sendVerificationCode(user.id, user.email, user.name);
+            this._logger.info('Email sent');
             this._responseFactory.buildSuccessResponse(res, 201);
         } catch (err) {
             this._responseFactory.propagateError(next, new ServerError(err));
