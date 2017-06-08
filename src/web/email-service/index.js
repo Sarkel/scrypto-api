@@ -8,6 +8,7 @@
 'use strict';
 const sendgrid = require('sendgrid');
 const Helper = sendgrid.mail;
+const {TemplateFactory} = require('./template-factory');
 
 class EmailService {
     static _sendEmail(recipient, template, params) {

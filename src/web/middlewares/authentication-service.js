@@ -22,8 +22,8 @@ class AuthenticationService {
 
     static _extractTokenFromHeader(header) {
         if (header) {
-            const [, token] = header.split(' ');
-            if (values[0] === 'Bearer') {
+            const [prefix, token] = header.split(' ');
+            if (prefix === 'Bearer') {
                 return token;
             } else {
                 throw new MissingAuthenticationMethodError();

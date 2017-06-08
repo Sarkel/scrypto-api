@@ -23,6 +23,9 @@ class UnauthenticatedRouter extends BaseRouter {
         super();
         this._activateRouter = new ActivateRouter();
         this._passwordRouter = new PasswordRouter();
+        this._register = this._register.bind(this);
+        this._login = this._login.bind(this);
+        this._verification = this._verification.bind(this);
         this._setRoutes();
     }
 
@@ -40,20 +43,21 @@ class UnauthenticatedRouter extends BaseRouter {
 
     async _login(req, res, next) {
         try {
+            const {email, password} = req.body;
             const user = await this._pgDb.task(conn => {
                 return conn.oneOrNone(GET_ACTIVE_USER_BY_EMAIL_OR_ID, {
-                    email: req.body.email,
+                    email: email,
                     userId: null
                 });
             });
-            if (user && Encryption.comparePasswords(req.body.password, user.seed, user.password)) {
+            if (user && Encryption.comparePasswords(password, user.seed, user.password)) {
                 this._responseFactory.buildSuccessResponse(res, 200, {
                     user_id: user.id,
                     name: user.name,
                     token: AuthenticationToken.getToken()
                 });
             } else {
-                this._responseFactory.propagateError(next, new InvalidCredentialsError(err));
+                this._responseFactory.propagateError(next, new InvalidCredentialsError());
             }
         } catch (err) {
             this._responseFactory.propagateError(next, new ServerError(err));
