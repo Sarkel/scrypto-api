@@ -23,9 +23,9 @@ class App {
         this._responseFactory = ResponseFactory.getInstance();
 
         this._setPort();
-        this._setBodyParser();
         this._setMiddlewares();
         this._setCors();
+        this._setBodyParser();
         this._createRoutes();
         this._createErrorHandler();
     }
@@ -45,7 +45,7 @@ class App {
     }
 
     _setBodyParser() {
-        this._app.use(bodyParser.urlencoded({extended: false}));
+        this._app.use(bodyParser.json());
     }
 
     _setPort() {

@@ -6,8 +6,8 @@
  */
 
 'use strict';
-const redis = require('then-redis');
+const {createClient} = require('then-redis');
 
-const redisClient = redis.createClient(process.env.REDIS_URL);
+const redisClient = createClient(process.env.REDIS_URL);
 
 module.exports = {redisClient};

@@ -10,17 +10,19 @@ const {BaseRouter} = require('./base-router');
 const {ServerError} = require('../utilities/error-factory');
 
 const GET_ALL_FIRST_CURRENCY = 'SELECT name FROM scrypto.sc_unique_first_currencies;';
-const LATEST_CURRENCY_DATA = 'SELECT * FROM scrypto.sc_get_latest_currency_data($[name], $[userId])';
+const LATEST_CURRENCY_DATA = 'SELECT * FROM scrypto.sc_get_latest_currency_data($[name], $[userId]);';
 
 class CurrencyRouter extends BaseRouter {
     constructor() {
         super();
+        this._getTabs = this._getTabs.bind(this);
+        this._getLatest = this._getLatest.bind(this);
         this._setRoutes();
     }
 
     _setRoutes() {
         this._createGetRoute('/', this._getTabs);
-        this._createGetRoute('/latest/:userId/:name', this._getLatest);
+        this._createGetRoute('/latest/:name/user/:userId', this._getLatest);
     }
 
     getUri() {

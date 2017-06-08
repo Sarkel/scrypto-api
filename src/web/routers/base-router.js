@@ -10,7 +10,7 @@ const {Router} = require('express');
 const {Logger} = require('../../lib/logger');
 const pgDb = require('../../lib/database');
 const {ResponseFactory} = require('../utilities/response-factory');
-const redisClient = require('../../lib/redis');
+const {redisClient} = require('../../lib/redis');
 
 class BaseRouter {
     constructor() {

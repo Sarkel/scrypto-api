@@ -14,6 +14,7 @@ const ACTIVATE_USER = 'SELECT scrypto.sc_activate_user($[userId]);';
 class ActivateRouter extends BaseRouter {
     constructor() {
         super();
+        this._doActivate = this._doActivate.bind(this);
         this._setRoutes();
     }
 
@@ -30,7 +31,7 @@ class ActivateRouter extends BaseRouter {
             const code = req.params.code;
             const userId = await this._redis.get(code);
             await this._pgDb.task(conn => {
-                return conn.none(ACTIVATE_USER, {userId})
+                return conn.any(ACTIVATE_USER, {userId})
             });
             this._redis.del(code);
             this._responseFactory.buildSuccessResponse(res, 201);

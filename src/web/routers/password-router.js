@@ -15,6 +15,7 @@ const CHANGE_PASSWORD = 'SELECT scrypto.sc_change_password($[password], $[seed],
 class PasswordRouter extends BaseRouter {
     constructor() {
         super();
+        this._change = this._change.bind(this);
         this._setRoutes();
     }
 
@@ -23,7 +24,7 @@ class PasswordRouter extends BaseRouter {
     }
 
     getUri() {
-        return '/activate';
+        return '/password';
     }
 
     async _change(req, res, next) {
@@ -31,7 +32,7 @@ class PasswordRouter extends BaseRouter {
             const code = req.params.code;
             const userId = await this._redis.get(code);
             await this._pgDb.task(conn => {
-                return conn.none(CHANGE_PASSWORD,
+                return conn.any(CHANGE_PASSWORD,
                     Object.assign({userId}, Encryption.encryptPassword(req.body.password))
                 );
             });
