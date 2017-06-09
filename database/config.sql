@@ -107,11 +107,11 @@ CREATE OR REPLACE FUNCTION scrypto.sc_change_password(password text, seed text, 
     UPDATE scrypto.sc_user SET password = password, seed = seed WHERE id = user_id AND active = true;
 $$ LANGUAGE sql;
 
-CREATE OR REPLACE FUNCTION scrypto.sc_get_active_user(email varchar(255), user_id bigint)
+CREATE OR REPLACE FUNCTION scrypto.sc_get_user_by_email_or_id(email varchar(255), user_id bigint)
 RETURNS SETOF scrypto.sc_active_user AS $$
     SELECT u.id, u.email, u.password, u.name, u.seed
             FROM scrypto.sc_user AS u
-            WHERE (u.email = email OR u.id = user_id) AND u.active = true;
+            WHERE (u.email = email OR u.id = user_id);
 $$ LANGUAGE sql;
 
 CREATE OR REPLACE FUNCTION scrypto.sc_create_user(email varchar(255), password text, seed text, name varchar(255))

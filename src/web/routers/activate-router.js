@@ -7,7 +7,7 @@
 
 'use strict';
 const {BaseRouter} = require('./base-router');
-const {ServerError} = require('../utilities/error-factory');
+const {ServerError, BadRequestError} = require('../utilities/error-factory');
 
 const ACTIVATE_USER = 'SELECT scrypto.sc_activate_user($[userId]);';
 
@@ -34,7 +34,11 @@ class ActivateRouter extends BaseRouter {
                 return conn.any(ACTIVATE_USER, {userId})
             });
             this._redis.del(code);
-            this._responseFactory.buildSuccessResponse(res, 201);
+            if(userId) {
+                this._responseFactory.buildSuccessResponse(res, 201);
+            } else {
+                this._responseFactory.propagateError(next, new BadRequestError());
+            }
         } catch (err) {
             this._responseFactory.propagateError(next, new ServerError(err));
         }
