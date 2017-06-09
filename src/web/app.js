@@ -29,10 +29,6 @@ class App {
         this._app.use(bodyParser.urlencoded({extended: false}));
 
         this._setCors();
-        this._app.post('/test', (req, res, next) => {
-            console.log();
-            res.json();
-        });
         this._createRoutes();
         this._createErrorHandler();
     }
