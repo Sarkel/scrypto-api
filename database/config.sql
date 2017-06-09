@@ -54,6 +54,10 @@ ALTER TABLE scrypto.sc_user_currency_rate
     FOREIGN KEY ("currency") REFERENCES scrypto.sc_currency("name");
 
 
+-- indexes
+CREATE INDEX sc_user_currency_rate_currency ON scrypto.sc_user_currency_rate(currency);
+
+
 -- views
 CREATE OR REPLACE VIEW scrypto.sc_latest_currency_data_view AS
     SELECT cd.id AS id, c.second AS second, c.first AS first, cd.amount AS amount,
