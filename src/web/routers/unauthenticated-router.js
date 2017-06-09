@@ -91,7 +91,7 @@ class UnauthenticatedRouter extends BaseRouter {
             await Email.sendVerificationCode(user.id, user.email, user.name);
             this._responseFactory.buildSuccessResponse(res, 200);
         } catch (err) {
-            this._responseFactory.propagateError(next, errors.SERVER_ERROR, err);
+            this._responseFactory.propagateError(next, new ServerError(err));
         }
     }
 }
