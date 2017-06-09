@@ -38,7 +38,7 @@ class UserRouter extends BaseRouter {
             const code = req.params.code;
             const userId = await this._redis.get(code);
             await pgDb.task(conn => {
-                return conn.none(DEACTIVATE_USER, {userId});
+                return conn.any(DEACTIVATE_USER, {userId});
             });
             this._redis.del(code);
             this._responseFactory.buildSuccessResponse(res, 201);
