@@ -13,6 +13,7 @@ const cors = require('cors');
 const {Logger} = require('../lib/logger');
 const {AppRouter} = require('./routers/app-router');
 const {ResponseFactory} = require('./utilities/response-factory');
+const morgan = require('morgan');
 
 const PORT = process.env.PORT || 5000;
 
@@ -22,10 +23,16 @@ class App {
         this._logger = Logger.getInstance();
         this._responseFactory = ResponseFactory.getInstance();
 
-        this._setPort();
-        this._setMiddlewares();
+        this._app.set('port', PORT);
+        this._app.use(morgan('dev'));
+        this._app.use(bodyParser.json());
+        this._app.use(bodyParser.urlencoded({extended: false}));
+
         this._setCors();
-        this._setBodyParser();
+        this._app.post('/test', (req, res, next) => {
+            console.log();
+            res.json();
+        });
         this._createRoutes();
         this._createErrorHandler();
     }
@@ -38,18 +45,6 @@ class App {
         const corsSettings = cors();
         this._app.use(corsSettings);
         this._app.options('*', corsSettings);
-    }
-
-    _setMiddlewares() {
-        this._app.use(helmet());
-    }
-
-    _setBodyParser() {
-        this._app.use(bodyParser.json());
-    }
-
-    _setPort() {
-        this._app.set('port', PORT);
     }
 
     _createRoutes() {

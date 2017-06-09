@@ -19,6 +19,7 @@
     "jsonwebtoken": "^7.4.0",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
+    "morgan": "^1.8.2",
     "pg-promise": "^5.6.4",
     "pug": "^2.0.0-beta.12",
     "random-string": "^0.2.0",
