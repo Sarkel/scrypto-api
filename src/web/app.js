@@ -14,6 +14,8 @@ const {Logger} = require('../lib/logger');
 const {AppRouter} = require('./routers/app-router');
 const {ResponseFactory} = require('./utilities/response-factory');
 const morgan = require('morgan');
+const http = require('http');
+const {WebSocket} = require('./web-socket');
 
 const PORT = process.env.PORT || 5000;
 
@@ -23,12 +25,21 @@ class App {
         this._logger = Logger.getInstance();
         this._responseFactory = ResponseFactory.getInstance();
 
+        this._server = http.Server(this._app);
+
+        new WebSocket(this._server);
+
         this._app.set('port', PORT);
         this._app.use(morgan('dev'));
         this._app.use(bodyParser.json());
         this._app.use(bodyParser.urlencoded({extended: false}));
 
+        this._app.get('/', (req, res) => {
+            res.sendFile(require('path').join(__dirname, 'test.html'));
+        });
+
         this._setCors();
+
         this._createRoutes();
         this._createErrorHandler();
     }
@@ -55,7 +66,7 @@ class App {
     }
 
     listen() {
-        this._app.listen(PORT, () => {
+        this._server.listen(PORT, () => {
             this._logger.info(`'Node app is running on port: ${PORT}'`);
         });
     }

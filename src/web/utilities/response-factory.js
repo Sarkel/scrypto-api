@@ -24,15 +24,25 @@ class ResponseFactory {
     }
 
     static getInstance() {
-        if(!ResponseFactory._instance) {
+        if (!ResponseFactory._instance) {
             ResponseFactory._instance = new ResponseFactory();
         }
         return ResponseFactory._instance;
     }
 
     buildSuccessResponse(res, status, payload = null) {
-        this._logger.info('Success request');
         res.status(status).json(ResponseFactory._buildResponse(true, {payload}));
+    }
+
+    buildSuccessMessage(socket, eventName, payload) {
+        socket.emit(eventName, ResponseFactory._buildResponse(true, {payload}));
+    }
+
+    buildErrorMessage(socket, eventName, err) {
+        socket.emit('error', ResponseFactory._buildResponse(false, {
+            error_message: err.getMessage(),
+            event_name: eventName
+        }));
     }
 
     buildErrorResponse(res, err) {
