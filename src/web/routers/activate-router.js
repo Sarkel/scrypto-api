@@ -8,6 +8,7 @@
 'use strict';
 const {BaseRouter} = require('./base-router');
 const {ServerError, BadRequestError} = require('../utilities/error-factory');
+const {EmailService} = require('../email-service');
 
 const ACTIVATE_USER = 'SELECT scrypto.sc_activate_user($[userId]);';
 
@@ -30,12 +31,17 @@ class ActivateRouter extends BaseRouter {
         try {
             const code = req.params.code;
             const userId = await this._redis.get(code);
-            await this._pgDb.task(conn => {
-                return conn.any(ACTIVATE_USER, {userId})
-            });
             this._redis.del(code);
             if(userId) {
-                this._responseFactory.buildSuccessResponse(res, 201);
+                const user = await this._pgDb.task(conn => {
+                    return conn.oneOrNone(ACTIVATE_USER, {userId})
+                });
+                if(user) {
+                    await EmailService.sendAccountActivationNotification(user.email, user.name);
+                    this._responseFactory.buildSuccessResponse(res, 201);
+                } else {
+                    this._responseFactory.propagateError(next, new BadRequestError());
+                }
             } else {
                 this._responseFactory.propagateError(next, new BadRequestError());
             }

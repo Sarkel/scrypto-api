@@ -98,13 +98,31 @@ CREATE TYPE scrypto.sc_new_user AS (
     email varchar(255)
 );
 
+CREATE TYPE scrypto.sc_deactivated_user AS (
+    name varchar(255),
+    email varchar(255)
+);
+
+CREATE TYPE scrypto.sc_activated_user AS (
+    name varchar(255),
+    email varchar(255)
+);
+
+CREATE TYPE scrypto.sc_updated_user AS (
+    name varchar(255),
+    email varchar(255)
+);
+
 -- functions
-CREATE OR REPLACE FUNCTION scrypto.sc_activate_user(user_id bigint) RETURNS void AS $$
+CREATE OR REPLACE FUNCTION scrypto.sc_activate_user(user_id bigint) RETURNS scrypto.sc_activated_user AS $$
     UPDATE scrypto.sc_user SET active = true WHERE id = user_id;
+    SELECT u.email AS email, u.name AS name FROM scrypto.sc_user AS u WHERE u.id = user_id;
 $$ LANGUAGE sql;
 
-CREATE OR REPLACE FUNCTION scrypto.sc_change_password(password text, seed text, user_id bigint) RETURNS void AS $$
+CREATE OR REPLACE FUNCTION scrypto.sc_change_password(password text, seed text, user_id bigint)
+RETURNS scrypto.sc_updated_user AS $$
     UPDATE scrypto.sc_user SET password = password, seed = seed WHERE id = user_id AND active = true;
+    SELECT u.email AS email, u.name AS name FROM scrypto.sc_user AS u WHERE u.id = user_id;
 $$ LANGUAGE sql;
 
 CREATE OR REPLACE FUNCTION scrypto.sc_get_user_by_email_or_id(email varchar(255), user_id bigint)
@@ -127,8 +145,9 @@ RETURNS SETOF scrypto.sc_latest_currency_data AS $$
             WHERE lower(first) = lower(name_param) AND user_id = user_id_param;
 $$ LANGUAGE sql;
 
-CREATE OR REPLACE FUNCTION scrypto.sc_deactivate_user(user_id bigint) RETURNS void AS $$
+CREATE OR REPLACE FUNCTION scrypto.sc_deactivate_user(user_id bigint) RETURNS scrypto.sc_deactivated_user AS $$
     UPDATE scrypto.sc_user SET active = false WHERE id = user_id;
+    SELECT u.email AS email, u.name AS name FROM scrypto.sc_user AS u WHERE u.id = user_id;
 $$ LANGUAGE sql;
 
 CREATE OR REPLACE FUNCTION scrypto.process_currency_rate() RETURNS trigger AS $$
