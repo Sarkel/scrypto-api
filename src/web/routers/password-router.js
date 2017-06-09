@@ -9,6 +9,7 @@
 const {BaseRouter} = require('./base-router');
 const {ServerError, BadRequestError} = require('../utilities/error-factory');
 const {Encryption} = require('../utilities/encryption');
+const {EmailService} = require('../email-service');
 
 const CHANGE_PASSWORD = 'SELECT scrypto.sc_change_password($[password], $[seed], $[userId]);';
 
@@ -33,12 +34,17 @@ class PasswordRouter extends BaseRouter {
             const userId = await this._redis.get(code);
             this._redis.del(code);
             if(userId) {
-                await this._pgDb.task(conn => {
+                const user = await this._pgDb.task(conn => {
                     return conn.any(CHANGE_PASSWORD,
                         Object.assign({userId}, Encryption.encryptPassword(req.body.password))
                     );
                 });
-                this._responseFactory.buildSuccessResponse(res, 205);
+                if(user) {
+                    await EmailService.sendPasswordChangeNotification(user.email, user.name);
+                    this._responseFactory.buildSuccessResponse(res, 205);
+                } else {
+                    this._responseFactory.propagateError(next, new BadRequestError());
+                }
             } else {
                 this._responseFactory.propagateError(next, new BadRequestError());
             }
