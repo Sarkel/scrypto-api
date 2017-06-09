@@ -48,6 +48,7 @@ class CurrencyRouter extends BaseRouter {
                     userId: req.params.userId
                 });
             });
+            // todo: process data to fit in correct format
             this._responseFactory.buildSuccessResponse(res, 200, recentCurrencyData);
         } catch (err) {
             this._responseFactory.propagateError(next, new ServerError(err));

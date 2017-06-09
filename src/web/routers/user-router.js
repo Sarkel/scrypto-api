@@ -14,6 +14,8 @@ const DEACTIVATE_USER = 'SELECT scrypto.sc_deactivate_user($[userId]);';
 class UserRouter extends BaseRouter {
     constructor() {
         super();
+        this._update = this._update.bind(this);
+        this._deactivateUser = this._deactivateUser.bind(this);
         this._setRoutes();
     }
 

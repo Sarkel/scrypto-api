@@ -11,6 +11,7 @@ const {BaseRouter} = require('./base-router');
 class SearchRouter extends BaseRouter {
     constructor() {
         super();
+        this._doSearch = this._doSearch.bind(this);
         this._setRoutes();
     }
 

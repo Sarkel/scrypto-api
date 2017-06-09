@@ -120,11 +120,11 @@ RETURNS scrypto.sc_new_user AS $$
     SELECT u.id, u.name, u.email FROM scrypto.sc_user AS u WHERE u.email = email LIMIT 1;
 $$ LANGUAGE sql;
 
-CREATE OR REPLACE FUNCTION scrypto.sc_get_latest_currency_data(name varchar(10), user_id bigint)
+CREATE OR REPLACE FUNCTION scrypto.sc_get_latest_currency_data(name_param varchar(10), user_id_param bigint)
 RETURNS SETOF scrypto.sc_latest_currency_data AS $$
         SELECT id, second, first, amount, rate, type, name, multiplier
             FROM scrypto.sc_latest_currency_data_view
-            WHERE lower(first) = lower(name) AND user_id = user_id;
+            WHERE lower(first) = lower(name_param) AND user_id = user_id_param;
 $$ LANGUAGE sql;
 
 CREATE OR REPLACE FUNCTION scrypto.sc_deactivate_user(user_id bigint) RETURNS void AS $$
