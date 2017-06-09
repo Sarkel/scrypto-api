@@ -9,15 +9,66 @@
 const pug = require('pug');
 const path = require('path');
 
-class TemplateFactory {
-    static _getTemplate(templateName) {
-        return pug.compileFile(path.join(__dirname, 'templates', templateName))
+class BaseTemplateFactory {
+    _getTemplate() {
+        return pug.compileFile(path.join(__dirname, 'templates', this._getContentFileName()));
+    }
+
+    getSubject() {
+    }
+
+    getContent() {
+        return this._getTemplate();
+    }
+
+    _getContentFileName() {
     }
 }
 
-TemplateFactory.VERIFICATION_CODE = {
-    subject: 'Email verification',
-    content: TemplateFactory._getTemplate('verification_code.pug')
-};
+class VerificationCodeTemplateFactory extends BaseTemplateFactory{
+    getSubject() {
+        return 'Email verification';
+    }
 
-module.exports = {TemplateFactory};
+    _getContentFileName() {
+        return 'verification_code.pug';
+    }
+}
+
+class AccountActivationTemplateFactory extends BaseTemplateFactory {
+    getSubject() {
+        return 'Account activation';
+    }
+
+    _getContentFileName() {
+        return 'account_activation.pug';
+    }
+}
+
+class AccountDeactivationTemplateFactory extends BaseTemplateFactory {
+    getSubject() {
+        return 'Account deactivation';
+    }
+
+    _getContentFileName() {
+        return 'account_deactivation.pug';
+    }
+}
+
+class ChangedPasswordTemplateFactory extends BaseTemplateFactory {
+    getSubject() {
+        return 'Changed password';
+    }
+
+    _getContentFileName() {
+        return 'changed_password.pug';
+    }
+}
+
+module.exports = {
+    VerificationCodeTemplateFactory,
+    AccountActivationTemplateFactory,
+    BaseTemplateFactory,
+    AccountDeactivationTemplateFactory,
+    ChangedPasswordTemplateFactory
+};
