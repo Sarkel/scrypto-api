@@ -87,7 +87,7 @@ class UnauthenticatedRouter extends BaseRouter {
     async _verification(req, res, next) {
         try {
             const user = await this._pgDb.task(conn => {
-                return conn.oneOrNone(GET_ACTIVE_USER_BY_EMAIL_OR_ID, {
+                return conn.oneOrNone(GET_USER_BY_EMAIL_OR_ID, {
                     email: req.body.email,
                     userId: req.body.id
                 });
