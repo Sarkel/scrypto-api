@@ -64,6 +64,14 @@ class ServerError extends BaseError {
     }
 }
 
+class BadRequestError extends BaseError {
+    constructor() {
+        super();
+        this._message = 'Data is missing or is incorrect';
+        this._status = 400;
+    }
+}
+
 module.exports = {
     NotFoundError,
     MissingAuthenticationMethodError,
@@ -71,5 +79,6 @@ module.exports = {
     InvalidAuthorizationToken,
     InvalidCredentialsError,
     ServerError,
-    BaseError
+    BaseError,
+    BadRequestError
 };

@@ -7,14 +7,14 @@
 
 'use strict';
 const {BaseRouter} = require('./base-router');
-const {InvalidCredentialsError, ServerError} = require('../utilities/error-factory');
+const {InvalidCredentialsError, ServerError, BadRequestError} = require('../utilities/error-factory');
 const {Encryption} = require('../utilities/encryption');
 const {Email} = require('../utilities/email');
 const {ActivateRouter} = require('./activate-router');
 const {PasswordRouter} = require('./password-router');
 const {AuthenticationToken} = require('../utilities/authentication-token');
 
-const GET_ACTIVE_USER_BY_EMAIL_OR_ID = 'SELECT * FROM scrypto.sc_get_active_user($[email], $[userId]);';
+const GET_ACTIVE_USER_BY_EMAIL_OR_ID = 'SELECT * FROM scrypto.sc_get_user_by_email_or_id($[email], $[userId]);';
 
 const CREATE_USER = 'SELECT * FROM scrypto.sc_create_user($[email], $[password], $[seed], $[name])';
 
@@ -65,16 +65,20 @@ class UnauthenticatedRouter extends BaseRouter {
 
     async _register(req, res, next) {
         try {
-            const user = await this._pgDb.task(conn => {
-                return conn.one(CREATE_USER, Object.assign({
-                        email: req.body.email,
-                        name: req.body.name
-                    },
-                    Encryption.encryptPassword(req.body.password))
-                );
-            });
-            await Email.sendVerificationCode(user.id, user.email, user.name);
-            this._responseFactory.buildSuccessResponse(res, 201);
+            if(req.body && req.body.password && req.body.email && req.body.name) {
+                const user = await this._pgDb.task(conn => {
+                    return conn.one(CREATE_USER, Object.assign({
+                            email: req.body.email,
+                            name: req.body.name
+                        },
+                        Encryption.encryptPassword(req.body.password))
+                    );
+                });
+                await Email.sendVerificationCode(user.id, user.email, user.name);
+                this._responseFactory.buildSuccessResponse(res, 201);
+            } else {
+                this._responseFactory.propagateError(next, new BadRequestError());
+            }
         } catch (err) {
             this._responseFactory.propagateError(next, new ServerError(err));
         }
@@ -88,8 +92,12 @@ class UnauthenticatedRouter extends BaseRouter {
                     userId: req.body.id
                 });
             });
-            await Email.sendVerificationCode(user.id, user.email, user.name);
-            this._responseFactory.buildSuccessResponse(res, 200);
+            if(user) {
+                await Email.sendVerificationCode(user.id, user.email, user.name);
+                this._responseFactory.buildSuccessResponse(res, 200);
+            } else {
+                this._responseFactory.propagateError(next, new BadRequestError());
+            }
         } catch (err) {
             this._responseFactory.propagateError(next, new ServerError(err));
         }

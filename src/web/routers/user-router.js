@@ -7,7 +7,7 @@
 
 'use strict';
 const {BaseRouter} = require('./base-router');
-const {ServerError} = require('../utilities/error-factory');
+const {ServerError, BadRequestError} = require('../utilities/error-factory');
 
 const DEACTIVATE_USER = 'SELECT scrypto.sc_deactivate_user($[userId]);';
 
@@ -37,11 +37,15 @@ class UserRouter extends BaseRouter {
         try {
             const code = req.params.code;
             const userId = await this._redis.get(code);
-            await this._pgDb.task(conn => {
-                return conn.any(DEACTIVATE_USER, {userId});
-            });
             this._redis.del(code);
-            this._responseFactory.buildSuccessResponse(res, 201);
+            if(userId) {
+                await this._pgDb.task(conn => {
+                    return conn.any(DEACTIVATE_USER, {userId});
+                });
+                this._responseFactory.buildSuccessResponse(res, 205);
+            } else {
+                this._responseFactory.propagateError(next, new BadRequestError());
+            }
         } catch (err) {
             this._responseFactory.propagateError(next, new ServerError(err));
         }
