@@ -48,6 +48,20 @@ class AuthenticationService {
             this._responseFactory.propagateError(next, e instanceof BaseError ? e : new ServerError(e));
         }
     }
+
+    static async authenticateSocket(socket, next) {
+        try {
+            const token = socket.handshake.query.token;
+            if(token) {
+                await AuthenticationToken.verify(token);
+                next();
+            } else {
+                socket.error(new MissingAuthorizationTokenError());
+            }
+        } catch (e) {
+            socket.error(e instanceof BaseError ? e : new ServerError(e));
+        }
+    }
 }
 
 module.exports = {AuthenticationService};
