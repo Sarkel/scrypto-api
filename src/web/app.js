@@ -33,6 +33,7 @@ class App {
         this._app.use(morgan('dev'));
         this._app.use(bodyParser.json());
         this._app.use(bodyParser.urlencoded({extended: false}));
+        this._app.use(helmet());
 
         this._app.get('/', (req, res) => {
             res.sendFile(require('path').join(__dirname, 'test.html'));
