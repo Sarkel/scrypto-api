@@ -43,8 +43,6 @@ class UnauthenticatedRouter extends BaseRouter {
 
     async _login(req, res, next) {
         try {
-            console.log(req.body);
-            console.log(req);
             const user = await this._pgDb.task(conn => {
                 return conn.oneOrNone(GET_USER_BY_EMAIL_OR_ID, {
                     email: req.body.email,
@@ -67,8 +65,6 @@ class UnauthenticatedRouter extends BaseRouter {
 
     async _register(req, res, next) {
         try {
-            console.log(req.body);
-            console.log(req);
             if(req.body && req.body.password && req.body.email && req.body.name) {
                 const user = await this._pgDb.task(conn => {
                     return conn.one(CREATE_USER, Object.assign({
