@@ -10,7 +10,7 @@ const {BaseRouter} = require('./base-router');
 const {ServerError, BadRequestError} = require('../utilities/error-factory');
 const {EmailService} = require('../email-service');
 
-const ACTIVATE_USER = 'SELECT scrypto.sc_activate_user($[userId]);';
+const ACTIVATE_USER = 'SELECT * FROM scrypto.sc_activate_user($[userId]);';
 
 class ActivateRouter extends BaseRouter {
     constructor() {
