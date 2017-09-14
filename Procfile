@@ -1,2 +1,4 @@
 web: node src/web
-worker: node src/workers/new-data-puller
+pull-new-data: node src/workers/new-data-puller
+clear-old-data: node src/schedulers/clear-currency-data
+update-currencies: node src/schedulers/update-currencies

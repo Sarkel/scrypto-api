@@ -22,8 +22,8 @@ class NewDataPuller {
         this._logger = Logger.getInstance();
         this._pgDb = pgDb;
         this._connection = new Connection({
-            url: 'wss://api.poloniex.com',
-            realm: 'realm1'
+            url: "wss://api.poloniex.com",
+            realm: "realm1"
         });
     }
 
@@ -74,9 +74,6 @@ class NewDataPuller {
             connection.client.on('notification', this._onNewCurrency);
             await connection.none(CREATE_LISTENER, 'new_currency');
             this._logger.info('Created listener');
-            setTimeout(() => {
-                process.exit();
-            }, 600000);
         } catch (e) {
             this._logger.error(e);
         }

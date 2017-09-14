@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "repository": "https://github.com/Sarkel/scrypto",
   "engines": {
-    "node": "7.9.0",
-    "npm": "4.2.0"
+    "node": "8.x.x"
   },
   "dependencies": {
     "autobahn": "^0.12.0",
