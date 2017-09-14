@@ -65,6 +65,7 @@ class UnauthenticatedRouter extends BaseRouter {
 
     async _register(req, res, next) {
         try {
+            console.log(req.body);
             if(req.body && req.body.password && req.body.email && req.body.name) {
                 const user = await this._pgDb.task(conn => {
                     return conn.one(CREATE_USER, Object.assign({
