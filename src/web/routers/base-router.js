@@ -14,7 +14,7 @@ const {redisClient} = require('../../lib/redis');
 
 class BaseRouter {
     constructor() {
-        this._router = Router();
+        this._router = Router({mergeParams: true});
         this._logger = Logger.getInstance();
         this._pgDb = pgDb;
         this._responseFactory = ResponseFactory.getInstance();

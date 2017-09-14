@@ -33,7 +33,7 @@ class UnauthenticatedRouter extends BaseRouter {
         this._createPostRoute('/login', this._login);
         this._createPostRoute('/register', this._register);
         this._createPostRoute('/verification', this._verification);
-        this._createRoute(this._activateRouter.getUri(), this._activateRouter._doActivate);
+        this._createRoute(this._activateRouter.getUri(), this._activateRouter.getRouter());
         this._createRoute(this._passwordRouter.getUri(), this._passwordRouter.getRouter());
     }
 
