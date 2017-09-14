@@ -31,11 +31,11 @@ class ActivateRouter extends BaseRouter {
         try {
             const code = req.params.code;
             const userId = await this._redis.get(code);
-            this._redis.del(code);
             if(userId) {
                 const user = await this._pgDb.task(conn => {
                     return conn.oneOrNone(ACTIVATE_USER, {userId})
                 });
+                this._redis.del(code);
                 if(user) {
                     await EmailService.sendAccountActivationNotification(user.email, user.name);
                     this._responseFactory.buildSuccessResponse(res, 201);

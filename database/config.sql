@@ -119,7 +119,7 @@ CREATE TYPE scrypto.sc_updated_user AS (
 
 -- functions
 CREATE OR REPLACE FUNCTION scrypto.sc_activate_user(user_id bigint) RETURNS scrypto.sc_activated_user AS $$
-    UPDATE scrypto.sc_user SET active = true WHERE id = user_id;
+    UPDATE scrypto.sc_user SET active = false WHERE id = user_id;
     SELECT u.email AS email, u.name AS name FROM scrypto.sc_user AS u WHERE u.id = user_id;
 $$ LANGUAGE sql;
 
