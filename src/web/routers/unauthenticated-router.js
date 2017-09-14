@@ -14,7 +14,7 @@ const {ActivateRouter} = require('./activate-router');
 const {PasswordRouter} = require('./password-router');
 const {AuthenticationToken} = require('../utilities/authentication-token');
 
-const GET_ACTIVE_USER_BY_EMAIL_OR_ID = 'SELECT * FROM scrypto.sc_get_user_by_email_or_id($[email], $[userId]);';
+const GET_USER_BY_EMAIL_OR_ID = 'SELECT * FROM scrypto.sc_get_user_by_email_or_id($[email], $[userId]);';
 
 const CREATE_USER = 'SELECT * FROM scrypto.sc_create_user($[email], $[password], $[seed], $[name])';
 
@@ -44,7 +44,7 @@ class UnauthenticatedRouter extends BaseRouter {
     async _login(req, res, next) {
         try {
             const user = await this._pgDb.task(conn => {
-                return conn.oneOrNone(GET_ACTIVE_USER_BY_EMAIL_OR_ID, {
+                return conn.oneOrNone(GET_USER_BY_EMAIL_OR_ID, {
                     email: req.body.email,
                     userId: null
                 });
